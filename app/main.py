@@ -55,6 +55,7 @@ def create_app(config=None):
             "tiers": ("分段核算",),
             "refunds": ("旧期回冲", "退单证据"),
             "reconcile": ("柜台对账",),
+            "joint": ("联合汇总", "联合勾稽"),
             "publish": (),
         }[stage]
         return render_template(
@@ -98,6 +99,7 @@ def create_app(config=None):
             location=url_for("work", stage=stage, run=key, sample=sample, reuse="1" if reused else None),
             balance=run["行数勾稽"],
             totals=run["金额勾稽"],
+            joint_hold=run.get("联合挂起", False),
         ), 200 if reused else 201
 
     @app.get("/api/export/<run_id>")

@@ -10,6 +10,8 @@ REASONS = {
     "REFUND_LIMIT": "累计退款超过原款",
     "REFUND_SHOP": "退单柜台与原单不同",
     "AFTER_CUT": "晚于结账截止日",
+    "JOINT_MISSING_CONTRACT": "联合组成员合同缺失，联合结算挂起",
+    "JOINT_SALES_ISOLATED": "联合组成员存在销售隔离记录，联合结算挂起",
 }
 
 

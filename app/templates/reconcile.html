@@ -12,6 +12,24 @@
       <div><dt>{{ row['柜台'] }} <span class="status" data-status="{{ row['对账'] }}">{{ row['对账'] }}</span></dt><dd>{{ row['应缴分']|yuan }}</dd></div>
     {% endfor %}
     </dl>
+    {% if run['联合阶梯'] %}
+    <div class="ticket-joint">
+      <h3>联合调整另开（原账不变）</h3>
+      {% for group in run['联合阶梯'] %}
+      <p>{{ group['联合组'] }} ·
+        {% if group['是否挂起'] %}<span class="status" data-status="挂起">挂起不发布</span>
+        {% else %}优惠合计 {{ group['优惠合计分']|yuan }} 元，按净销售分摊至各柜{% endif %}
+      </p>
+      {% if not group['是否挂起'] %}
+      <dl>
+      {% for member in group['柜台明细'] %}
+        <div><dt>{{ member['柜台'] }} 联合调整</dt><dd>{{ member['联合调整分']|yuan }}</dd></div>
+      {% endfor %}
+      </dl>
+      {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
     <div class="stamp">{{ meta['账期'] }} / 月结</div>
   </section>
   <div class="receipt-tail">{{ register('收缴勾稽', run['柜台对账']) }}{{ register('跨期调整', run['旧期回冲']) }}</div>

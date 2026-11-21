@@ -1,10 +1,16 @@
 {% extends "base.html" %}
 {% from "ledger.jinja" import register %}
 {% block stage %}
+{% if run.get('联合挂起') %}
+<section class="hold-banner" role="alert">
+  <strong>联合结算挂起：</strong>存在合同缺失或销售隔离的联合组，本批次联合调整不予发布；分柜原账已保留，待账簿补齐后重跑。
+</section>
+{% endif %}
 <div class="register-grid">
   <section class="panel"><div class="panel-head"><h2>结算档案</h2><span>{{ history|length }} 批</span></div>
     <ol class="archive">{% for item in history %}<li><a href="{{ url_for('work', stage='publish', run=item['批次']) }}">{{ item['账期'] }} · {{ item['批次'] }}</a></li>{% endfor %}</ol>
   </section>
   {{ register('运行清单', [meta]) }}
+  {% if run.get('联合汇总') %}{{ register('联合发布状态', run['联合汇总']) }}{% endif %}
 </div>
 {% endblock %}

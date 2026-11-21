@@ -1,0 +1,46 @@
+{
+  "contracts": [
+    {
+      "shop": "101",
+      "version": "J-A1",
+      "start": "2026-11-01",
+      "end": "2027-01-01",
+      "minimum": "0",
+      "tiers": [
+        ["1000", 1000],
+        [null, 2000]
+      ]
+    },
+    {
+      "shop": "102",
+      "version": "J-B1",
+      "start": "2026-11-01",
+      "end": "2027-01-01",
+      "minimum": "0",
+      "tiers": [
+        ["1000", 1000],
+        [null, 2000]
+      ]
+    }
+  ],
+  "holidays": [],
+  "groups": [
+    {
+      "group": "G1 同商户联柜",
+      "members": ["101", "102"],
+      "tiers": [
+        ["2000", 500],
+        [null, 1500]
+      ]
+    }
+  ],
+  "events": [
+    {"id": "J1011", "shop": "101", "day": "2026-11-06", "amount": "800", "kind": "sale"},
+    {"id": "J1012", "shop": "101", "day": "2026-11-20", "amount": "100", "kind": "sale"},
+    {"id": "J1021", "shop": "102", "day": "2026-11-08", "amount": "700", "kind": "sale"}
+  ],
+  "statement": [
+    {"shop": "101", "paid": "85"},
+    {"shop": "102", "paid": "66.5"}
+  ]
+}

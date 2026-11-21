@@ -4,6 +4,7 @@ from app.config import MAX_SECTION_ROWS, MAX_SOURCE_BYTES
 from app.errors import InputError
 
 SECTIONS = ("contracts", "holidays", "events", "statement")
+OPTIONAL_SECTIONS = ("groups",)
 
 
 def unique_fields(pairs):
@@ -30,9 +31,12 @@ def open_payload(raw):
         )
     except (ValueError, RecursionError) as exc:
         raise InputError("BAD_JSON", "JSON、编码或字段无效") from exc
-    if not isinstance(data, dict) or set(data) != set(SECTIONS):
-        raise InputError("BAD_SECTIONS", "四个账簿字段须完整")
-    for section in SECTIONS:
+    if not isinstance(data, dict) or not set(data).issuperset(SECTIONS) or (
+        set(data) - set(SECTIONS) - set(OPTIONAL_SECTIONS)
+    ):
+        raise InputError("BAD_SECTIONS", "四个账簿字段须完整，联合分组为可选字段")
+    for section in SECTIONS + tuple(key for key in OPTIONAL_SECTIONS if key in data):
         if not isinstance(data[section], list) or len(data[section]) > MAX_SECTION_ROWS:
             raise InputError("BAD_SECTION", f"{section} 需要不超过 1000 行")
+    data.setdefault("groups", [])
     return data

@@ -14,6 +14,7 @@
 | M4 累进抽成 | 对照档位费用与版本保底 | `GET /api/tiers/{id}` | `app/modules/m4_tiers/progressive.py` `app/modules/m4_tiers/service.py` | `tests/test_tiers.py` |
 | M5 退单回冲 | 追原流水，重算旧月应计差 | `GET /api/refunds/{id}` | `app/modules/m5_refunds/credits.py` `app/modules/m5_refunds/service.py` | `tests/test_refunds.py` |
 | M6 租金勾稽 | 核对实缴、欠缴与账簿行数 | `GET /api/reconcile/{id}` | `app/modules/m6_reconcile/service.py` `app/modules/m6_reconcile/totals.py` | `tests/test_reconcile.py` |
+| M8 联合阶梯 | 同商户多柜按合计销售跨档，另开联合调整并挂起异常组 | `GET /api/joint/{id}` | `app/modules/m8_joint/groups.py` `app/modules/m8_joint/service.py` | `tests/test_joint.py` `tests/test_joint_api.py` |
 | M7 结算复核 | 从批次凭证复算、下载证据 | `GET /api/publish/{id}` `POST /api/runs` | `app/modules/m7_publish/service.py` `app/modules/m7_publish/export.py` `app/store.py` | `tests/test_publish.py` |
 
 ## 陷阱登记
@@ -31,6 +32,14 @@
 | TRAP-17 | `mall.json` 旧金额字段 gross | 旧账对应列丢失 | 显式兼容别名 | `app/modules/m1_intake/service.py` | `tests/test_intake.py::test_legacy_alias` |
 | TRAP-23 | `mall.json` 合同于当日切换 | 同时计入两个版本 | 合同 `[start,end)` | `app/modules/m2_contracts/versions.py` | `tests/test_contracts.py::test_adjacent_boundaries` |
 | TRAP-25 | `mall.json` 存在合同重叠 | 随机采信一版 | 暂停区间内归属并提供冲突区间 | `app/modules/m2_contracts/service.py` | `tests/test_contracts.py::test_overlap_not_guessed` |
+| TRAP-31 | 同商户柜台合计销售才跨档，单柜月结各自独立 | 只按单柜丢优惠，或统一降档让低销售柜分走优惠 | 保留分柜原账，另开联合调整；优惠按各柜净销售以最大余数法分摊，挂起组不发布 | `app/modules/m8_joint/service.py` | `tests/test_joint.py::test_benefit_follows_sales_weight_and_conserves` |
+
+## 联合阶梯（M8）
+
+- 账簿可选第五段 `groups`：`group`、`members`（柜台字符串数组）、`tiers`（与合同同构，末档无上限）。同一柜台不得挂在两个组，结构错误以 `BAD_GROUP` 整批拒绝，沿用失败不写入旧批次。
+- 档位依据是组内成员**本月净销售合计**，对组联合阶梯重新计费；组费高于独立抽成合计时不产生调整，低销售柜台不会分走不属于自己的优惠。
+- 分柜月结账（保底、抽成、旧期回冲、应缴）原样保留。联合优惠作为单独的「联合调整分」按各柜净销售权重用最大余数法分摊，余数补给权重高的柜台，分柜承接合计与组优惠合计逐分勾稽。
+- 成员合同缺失（`JOINT_MISSING_CONTRACT`）或成员存在隔离记录（`JOINT_SALES_ISOLATED`）时该组标记挂起：联合调整一律为零、看板与结算页提示，批次 `联合挂起=true`，待账簿补齐后重跑；重跑命中同一输入摘要时复用旧批次，不新增结果。
 
 ## 验算
 
